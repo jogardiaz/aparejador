@@ -8,84 +8,59 @@ GUIDES_JOINTS_GRP='guides_joint_grp'
 def generate_guides(type, name, amount=0, thumb=None, color='8'):
     def spine(name, amount, color):
         for number_guide in range(amount):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, str(number_guide + 1)))[0]
-            if number_guide == 0:
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
+            guide_spine = cmds.spaceLocator(n='Guide_%s_%s' % (name, str(number_guide + 1)))[0]
+            if number_guide == 0: cmds.parent(guide_spine, GUIDES_GRP)                
             else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, str(number_guide)))
+                cmds.parent(guide_spine, 'Guide_%s_%s' % (name, str(number_guide)))
                 moveAmount = 2.8 / amount
-                cmds.xform(loc, t=(0, moveAmount, 0), os=True)
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
+                cmds.xform(guide_spine, t=(0, moveAmount, 0), os=True)
+            cmds.setAttr(guide_spine + '.overrideEnabled', True)
+            cmds.setAttr(guide_spine + '.overrideColor', color)
         cmds.xform('Guide_%s_1' % (name), t=(0, 9, 0), os=True)
     def l_arm(name, color):
-        arm = ('Clavicle', 'Shoulder', 'Elbow', 'Wrist', 'HandTip')
-        armPos = ((.1, 12, 0), (.85, .35, 0), (2.15, 0, 0), (2.5, 0, 0), (1, 0, 0))
-        for number_guide in range(len(arm)):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, arm[number_guide]))[0]
-            if arm[number_guide] == 'Clavicle':
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
-            else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, arm[number_guide - 1]))
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
-            cmds.xform('Guide_%s_%s' % (name, arm[number_guide]), t=armPos[number_guide], os=True)
+        ARM_GUIDES = ('Clavicle', 'Shoulder', 'Elbow', 'Wrist', 'HandTip')
+        arm_pos = ((.1, 12, 0), (.85, .35, 0), (2.15, 0, 0), (2.5, 0, 0), (1, 0, 0))
+        for number_guide in range(len(ARM_GUIDES)):
+            guide_arm = cmds.spaceLocator(n='Guide_%s_%s' % (name, ARM_GUIDES[number_guide]))[0]
+            if ARM_GUIDES[number_guide] == 'Clavicle': cmds.parent(guide_arm, GUIDES_GRP)                    
+            else: cmds.parent(guide_arm, 'Guide_%s_%s' % (name, ARM_GUIDES[number_guide - 1]))
+                
+            cmds.setAttr(guide_arm + '.overrideEnabled', True)
+            cmds.setAttr(guide_arm + '.overrideColor', color)
+            cmds.xform('Guide_%s_%s' % (name, ARM_GUIDES[number_guide]), t=arm_pos[number_guide], os=True)
     def r_arm(name, color):
-        arm = ('Clavicle', 'Shoulder', 'Elbow', 'Wrist', 'HandTip')
-        armPos = ((-.1, 12, 0), (-.85, .35, 0), (-2.15, 0, 0), (-2.5, 0, 0), (-1, 0, 0))
-        for number_guide in range(len(arm)):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, arm[number_guide]))[0]
-            if arm[number_guide] == 'Clavicle':
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
-            else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, arm[number_guide - 1]))
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
-            cmds.xform('Guide_%s_%s' % (name, arm[number_guide]), t=armPos[number_guide], os=True)
+        ARM_GUIDES = ('Clavicle', 'Shoulder', 'Elbow', 'Wrist', 'HandTip')
+        arm_pos = ((-.1, 12, 0), (-.85, .35, 0), (-2.15, 0, 0), (-2.5, 0, 0), (-1, 0, 0))
+        for number_guide in range(len(ARM_GUIDES)):
+            guide_arm = cmds.spaceLocator(n='Guide_%s_%s' % (name, ARM_GUIDES[number_guide]))[0]
+            if ARM_GUIDES[number_guide] == 'Clavicle': cmds.parent(guide_arm, GUIDES_GRP)                    
+            else: cmds.parent(guide_arm, 'Guide_%s_%s' % (name, ARM_GUIDES[number_guide - 1]))
+                
+            cmds.setAttr(guide_arm + '.overrideEnabled', True)
+            cmds.setAttr(guide_arm + '.overrideColor', color)
+            cmds.xform('Guide_%s_%s' % (name, ARM_GUIDES[number_guide]), t=arm_pos[number_guide], os=True)
     def l_leg(name, color):
-        leg = ('Pelvis', 'Hip', 'Knee', 'Ankle', 'Ball', 'FootTip')
-        legPos = ((.34, 8.6, 0), (.14, -.8, 0), (0, -3.7, .1), (0, -3.4, -.1), (0, -.52, .65), (0, 0, .9))
-        for number_guide in range(len(leg)):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, leg[number_guide]))[0]
-            if leg[number_guide] == 'Pelvis':
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
-            else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, leg[number_guide - 1]))
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
-            cmds.xform('Guide_%s_%s' % (name, leg[number_guide]), t=legPos[number_guide], os=True)
+        LEG_GUIDES = ('Pelvis', 'Hip', 'Knee', 'Ankle', 'Ball', 'FootTip')
+        leg_pos = ((.34, 8.6, 0), (.14, -.8, 0), (0, -3.7, .1), (0, -3.4, -.1), (0, -.52, .65), (0, 0, .9))
+        for number_guide in range(len(LEG_GUIDES)):
+            guide_leg = cmds.spaceLocator(n='Guide_%s_%s' % (name, LEG_GUIDES[number_guide]))[0]
+            if LEG_GUIDES[number_guide] == 'Pelvis': cmds.parent(guide_leg, GUIDES_GRP)
+            else: cmds.parent(guide_leg, 'Guide_%s_%s' % (name, LEG_GUIDES[number_guide - 1]))
+
+            cmds.setAttr(guide_leg + '.overrideEnabled', True)
+            cmds.setAttr(guide_leg + '.overrideColor', color)
+            cmds.xform('Guide_%s_%s' % (name, LEG_GUIDES[number_guide]), t=leg_pos[number_guide], os=True)
     def r_leg(name, color):
-        leg = ('Pelvis', 'Hip', 'Knee', 'Ankle', 'Ball', 'FootTip')
-        legPos = ((-.34, 8.6, 0), (-.14, -.8, 0), (0, -3.7, .1), (0, -3.4, -.1), (0, -.52, .65), (0, 0, .9))
-        for number_guide in range(len(leg)):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, leg[number_guide]))[0]
-            if leg[number_guide] == 'Pelvis':
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
-            else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, leg[number_guide - 1]))
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
-            cmds.xform('Guide_%s_%s' % (name, leg[number_guide]), t=legPos[number_guide], os=True)
+        LEG_GUIDES = ('Pelvis', 'Hip', 'Knee', 'Ankle', 'Ball', 'FootTip')
+        leg_pos = ((-.34, 8.6, 0), (-.14, -.8, 0), (0, -3.7, .1), (0, -3.4, -.1), (0, -.52, .65), (0, 0, .9))
+        for number_guide in range(len(LEG_GUIDES)):
+            guide_leg = cmds.spaceLocator(n='Guide_%s_%s' % (name, LEG_GUIDES[number_guide]))[0]
+            if LEG_GUIDES[number_guide] == 'Pelvis': cmds.parent(guide_leg, GUIDES_GRP)
+            else: cmds.parent(guide_leg, 'Guide_%s_%s' % (name, LEG_GUIDES[number_guide - 1]))
+
+            cmds.setAttr(guide_leg + '.overrideEnabled', True)
+            cmds.setAttr(guide_leg + '.overrideColor', color)
+            cmds.xform('Guide_%s_%s' % (name, LEG_GUIDES[number_guide]), t=leg_pos[number_guide], os=True)
     def l_hand(name, thumb, amount, color):
         thumbPos = ((5.6, 12.3, .17), (.075, 0, .06), (.16, 0, .12), (.15, 0, .25), (.1, 0, .2))
         fingersPos = (
@@ -97,71 +72,46 @@ def generate_guides(type, name, amount=0, thumb=None, color='8'):
         extraFingerPos = ((5.65, 12.3, -.15), (.56, 0, -.1), (.18, 0, 0), (.15, 0, 0), (.15, 0, 0))
         if thumb == True:
             for number_guide in range(5):
-                loc = cmds.spaceLocator(n='Guide_%s_thumb%s' % (name, number_guide + 1))[0]
-                if number_guide == 0:
-                    if cmds.objExists(GUIDES_GRP):
-                        cmds.parent(loc, GUIDES_GRP)
-                    else:
-                        cmds.group(n=GUIDES_GRP, em=1)
-                        cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.parent(loc, 'Guide_%s_thumb%s' % (name, number_guide))
-                cmds.setAttr(loc + '.overrideEnabled', 1)
-                cmds.setAttr(loc + '.overrideColor', color)
-            for i in range(5):
-                cmds.xform('Guide_%s_thumb%s' % (name, number_guide + 1), t=thumbPos[number_guide], os=True)
+                guide_thumb = cmds.spaceLocator(n='Guide_%s_thumb%s' % (name, number_guide + 1))[0]
+                if number_guide == 0: cmds.parent(guide_thumb, GUIDES_GRP)
+                else: cmds.parent(guide_thumb, 'Guide_%s_thumb%s' % (name, number_guide))
+                cmds.setAttr(guide_thumb + '.overrideEnabled', True)
+                cmds.setAttr(guide_thumb + '.overrideColor', color)
+                cmds.xform('Guide_%s_thumb%s' % (name, number_guide + 1), t=thumbPos[number_guide], os=True)                
 
         fingers = ('index', 'middle', 'ring', 'pinky')
         if amount <= 4:
-            for n in range(amount):
-                for i in range(5):
-                    loc = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[n], i + 1))[0]
-                    if i == 0:
-                        if cmds.objExists(GUIDES_GRP):
-                            cmds.parent(loc, GUIDES_GRP)
-                        else:
-                            cmds.group(n=GUIDES_GRP, em=1)
-                            cmds.parent(loc, GUIDES_GRP)
-                    else:
-                        cmds.parent(loc, 'Guide_%s_%s%s' % (name, fingers[n], i))
-                    cmds.setAttr(loc + '.overrideEnabled', 1)
-                    cmds.setAttr(loc + '.overrideColor', color)
-                for i in range(5):
-                    cmds.xform('Guide_%s_%s%s' % (name, fingers[n], i + 1), t=fingersPos[n][i], os=1)
-
+            for finger in range(amount):
+                for number_guide in range(5):
+                    guide_finger = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1))[0]
+                    if number_guide == 0: cmds.parent(guide_finger, GUIDES_GRP)
+                    else: cmds.parent(guide_finger, 'Guide_%s_%s%s' % (name, fingers[finger], number_guide))                        
+                    cmds.setAttr(guide_finger + '.overrideEnabled', True)
+                    cmds.setAttr(guide_finger + '.overrideColor', color)
+                    cmds.xform('Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1), t=fingersPos[finger][number_guide], os=True)
         else:
-            for n in range(len(fingers)):
-                for i in range(5):
-                    loc = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[n], i + 1))[0]
-                    if i == 0:
-                        if cmds.objExists(GUIDES_GRP):
-                            cmds.parent(loc, GUIDES_GRP)
-                        else:
-                            cmds.group(n=GUIDES_GRP, em=1)
-                            cmds.parent(loc, GUIDES_GRP)
+            for finger in range(len(fingers)):
+                for number_guide in range(5):
+                    guide_finger = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1))[0]
+                    if number_guide == 0: cmds.parent(guide_finger, GUIDES_GRP)
+                    else: cmds.parent(guide_finger, 'Guide_%s_%s%s' % (name, fingers[finger], number_guide))
+                    cmds.setAttr(guide_finger + '.overrideEnabled', True)
+                    cmds.setAttr(guide_finger + '.overrideColor', color)
+                    cmds.xform('Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1), t=fingersPos[finger][number_guide], os=True)
+
+            for finger in range(amount - 4):
+                for number_guide in range(5):
+                    guide_finger = cmds.spaceLocator(n='Guide_%s_extraFinger_%s_%s' % (name, finger + 1, number_guide + 1))[0]
+                    if number_guide == 0:
+                        print(finger + 1.0) / 10
+                        cmds.move(5.65, 12.3, extraFingerPos[0][2] - ((finger + 1.0) / 10), guide_finger, ls=True)
+                        cmds.parent(guide_finger, GUIDES_GRP)
                     else:
-                        cmds.parent(loc, 'Guide_%s_%s%s' % (name, fingers[n], i))
-                    cmds.setAttr(loc + '.overrideEnabled', 1)
-                    cmds.setAttr(loc + '.overrideColor', color)
-                for i in range(5):
-                    cmds.xform('Guide_%s_%s%s' % (name, fingers[n], i + 1), t=fingersPos[n][i], os=1)
-            for n in range(amount - 4):
-                for i in range(5):
-                    loc = cmds.spaceLocator(n='Guide_%s_extraFinger_%s_%s' % (name, n + 1, i + 1))[0]
-                    if i == 0:
-                        print(n + 1.0) / 10
-                        cmds.move(5.65, 12.3, extraFingerPos[0][2] - ((n + 1.0) / 10), loc, ls=True)
-                        if cmds.objExists(GUIDES_GRP):
-                            cmds.parent(loc, GUIDES_GRP)
-                        else:
-                            cmds.group(n=GUIDES_GRP, em=1)
-                            cmds.parent(loc, GUIDES_GRP)
-                    else:
-                        cmds.parent(loc, 'Guide_%s_extraFinger_%s_%s' % (name, n + 1, i))
-                    cmds.setAttr(loc + '.overrideEnabled', 1)
-                    cmds.setAttr(loc + '.overrideColor', color)
-                for i in range(1, 5):
-                    cmds.xform('Guide_%s_extraFinger_%s_%s' % (name, n + 1, i + 1), t=extraFingerPos[i], os=1)
+                        cmds.parent(guide_finger, 'Guide_%s_extraFinger_%s_%s' % (name, finger + 1, number_guide))
+                    cmds.setAttr(guide_finger + '.overrideEnabled', True)
+                    cmds.setAttr(guide_finger + '.overrideColor', color)
+                for number_guide in range(1, 5):
+                    cmds.xform('Guide_%s_extraFinger_%s_%s' % (name, finger + 1, number_guide + 1), t=extraFingerPos[number_guide], os=1)
     def r_hand(name, thumb, amount, color):
         thumbPos = ((-5.6, 12.3, .17), (-.075, 0, .06), (-.16, 0, .12), (-.15, 0, .25), (-.1, 0, .2))
         fingersPos = (
@@ -172,128 +122,84 @@ def generate_guides(type, name, amount=0, thumb=None, color='8'):
         )
         extraFingerPos = ((-5.65, 12.3, -.15), (-.56, 0, -.1), (-.18, 0, 0), (-.15, 0, 0), (-.15, 0, 0))
         if thumb == True:
-            for i in range(5):
-                loc = cmds.spaceLocator(n='Guide_%s_thumb%s' % (name, i + 1))[0]
-                if i == 0:
-                    if cmds.objExists(GUIDES_GRP):
-                        cmds.parent(loc, GUIDES_GRP)
-                    else:
-                        cmds.group(n=GUIDES_GRP, em=1)
-                        cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.parent(loc, 'Guide_%s_thumb%s' % (name, i))
-                cmds.setAttr(loc + '.overrideEnabled', 1)
-                cmds.setAttr(loc + '.overrideColor', color)
-            for i in range(5):
-                cmds.xform('Guide_%s_thumb%s' % (name, i + 1), t=thumbPos[i], os=True)
+            for number_guide in range(5):
+                guide_thumb = cmds.spaceLocator(n='Guide_%s_thumb%s' % (name, number_guide + 1))[0]
+                if number_guide == 0: cmds.parent(guide_thumb, GUIDES_GRP)
+                else: cmds.parent(guide_thumb, 'Guide_%s_thumb%s' % (name, number_guide))
+                cmds.setAttr(guide_thumb + '.overrideEnabled', True)
+                cmds.setAttr(guide_thumb + '.overrideColor', color)
+                cmds.xform('Guide_%s_thumb%s' % (name, number_guide + 1), t=thumbPos[number_guide], os=True)                
 
         fingers = ('index', 'middle', 'ring', 'pinky')
         if amount <= 4:
-            for n in range(amount):
-                for i in range(5):
-                    loc = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[n], i + 1))[0]
-                    if i == 0:
-                        if cmds.objExists(GUIDES_GRP):
-                            cmds.parent(loc, GUIDES_GRP)
-                        else:
-                            cmds.group(n=GUIDES_GRP, em=1)
-                            cmds.parent(loc, GUIDES_GRP)
-                    else:
-                        cmds.parent(loc, 'Guide_%s_%s%s' % (name, fingers[n], i))
-                    cmds.setAttr(loc + '.overrideEnabled', 1)
-                    cmds.setAttr(loc + '.overrideColor', color)
-                for i in range(5):
-                    cmds.xform('Guide_%s_%s%s' % (name, fingers[n], i + 1), t=fingersPos[n][i], os=1)
-
+            for finger in range(amount):
+                for number_guide in range(5):
+                    guide_finger = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1))[0]
+                    if number_guide == 0: cmds.parent(guide_finger, GUIDES_GRP)
+                    else: cmds.parent(guide_finger, 'Guide_%s_%s%s' % (name, fingers[finger], number_guide))                        
+                    cmds.setAttr(guide_finger + '.overrideEnabled', True)
+                    cmds.setAttr(guide_finger + '.overrideColor', color)
+                    cmds.xform('Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1), t=fingersPos[finger][number_guide], os=True)
         else:
-            for n in range(len(fingers)):
-                for i in range(5):
-                    loc = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[n], i + 1))[0]
-                    if i == 0:
-                        if cmds.objExists(GUIDES_GRP):
-                            cmds.parent(loc, GUIDES_GRP)
-                        else:
-                            cmds.group(n=GUIDES_GRP, em=1)
-                            cmds.parent(loc, GUIDES_GRP)
+            for finger in range(len(fingers)):
+                for number_guide in range(5):
+                    guide_finger = cmds.spaceLocator(n='Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1))[0]
+                    if number_guide == 0: cmds.parent(guide_finger, GUIDES_GRP)
+                    else: cmds.parent(guide_finger, 'Guide_%s_%s%s' % (name, fingers[finger], number_guide))
+                    cmds.setAttr(guide_finger + '.overrideEnabled', True)
+                    cmds.setAttr(guide_finger + '.overrideColor', color)
+                    cmds.xform('Guide_%s_%s%s' % (name, fingers[finger], number_guide + 1), t=fingersPos[finger][number_guide], os=True)
+
+            for finger in range(amount - 4):
+                for number_guide in range(5):
+                    guide_finger = cmds.spaceLocator(n='Guide_%s_extraFinger_%s_%s' % (name, finger + 1, number_guide + 1))[0]
+                    if number_guide == 0:
+                        print(finger + 1.0) / 10
+                        cmds.move(5.65, 12.3, extraFingerPos[0][2] - ((finger + 1.0) / 10), guide_finger, ls=True)
+                        cmds.parent(guide_finger, GUIDES_GRP)
                     else:
-                        cmds.parent(loc, 'Guide_%s_%s%s' % (name, fingers[n], i))
-                    cmds.setAttr(loc + '.overrideEnabled', 1)
-                    cmds.setAttr(loc + '.overrideColor', color)
-                for i in range(5):
-                    cmds.xform('Guide_%s_%s%s' % (name, fingers[n], i + 1), t=fingersPos[n][i], os=1)
-            for n in range(amount - 4):
-                for i in range(5):
-                    loc = cmds.spaceLocator(n='Guide_%s_extraFinger_%s_%s' % (name, n + 1, i + 1))[0]
-                    if i == 0:
-                        print
-                        'n'
-                        print
-                        n + 1
-                        print(n + 1.0) / 10
-                        cmds.move(-5.65, 12.3, extraFingerPos[0][2] - ((n + 1.0) / 10), loc, ls=True)
-                        if cmds.objExists(GUIDES_GRP):
-                            cmds.parent(loc, GUIDES_GRP)
-                        else:
-                            cmds.group(n=GUIDES_GRP, em=1)
-                            cmds.parent(loc, GUIDES_GRP)
-                    else:
-                        cmds.parent(loc, 'Guide_%s_extraFinger_%s_%s' % (name, n + 1, i))
-                    cmds.setAttr(loc + '.overrideEnabled', 1)
-                    cmds.setAttr(loc + '.overrideColor', color)
-                for i in range(1, 5):
-                    cmds.xform('Guide_%s_extraFinger_%s_%s' % (name, n + 1, i + 1), t=extraFingerPos[i], os=1)
+                        cmds.parent(guide_finger, 'Guide_%s_extraFinger_%s_%s' % (name, finger + 1, number_guide))
+                    cmds.setAttr(guide_finger + '.overrideEnabled', True)
+                    cmds.setAttr(guide_finger + '.overrideColor', color)
+                for number_guide in range(1, 5):
+                    cmds.xform('Guide_%s_extraFinger_%s_%s' % (name, finger + 1, number_guide + 1), t=extraFingerPos[number_guide], os=1)
     def l_foot(name, color):
-        listaLocs = ['heel', 'tip', 'in', 'out', 'ball', 'toes']
-        locsPos = [[.47, 0, -.3], [0, 0, 1.8], [-.39, 0, -.5], [.77, 0, 0], [-.39, 0, 0], [-.39, 0, 0]]
-        for number_guide in range(len(listaLocs)):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, listaLocs[number_guide]))[0]
-            if number_guide == 0:
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
-            elif number_guide == 5:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, listaLocs[3]))
-            else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, listaLocs[number_guide - 1]))
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
-            cmds.xform(loc, t=locsPos[number_guide], os=True)
+        FOOT_GUIDES = ['heel', 'tip', 'in', 'out', 'ball', 'toes']
+        foot_pos = [[.47, 0, -.3], [0, 0, 1.8], [-.39, 0, -.5], [.77, 0, 0], [-.39, 0, 0], [-.39, 0, 0]]
+        for number_guide in range(len(FOOT_GUIDES)):
+            guide_foot = cmds.spaceLocator(n='Guide_%s_%s' % (name, FOOT_GUIDES[number_guide]))[0]
+            if number_guide == 0: cmds.parent(guide_foot, GUIDES_GRP)
+            elif number_guide == 5: cmds.parent(guide_foot, 'Guide_%s_%s' % (name, FOOT_GUIDES[3]))
+            else: cmds.parent(guide_foot, 'Guide_%s_%s' % (name, FOOT_GUIDES[number_guide - 1]))
+            cmds.setAttr(guide_foot + '.overrideEnabled', True)
+            cmds.setAttr(guide_foot + '.overrideColor', color)
+            cmds.xform(guide_foot, t=foot_pos[number_guide], os=True)
     def r_foot(name, color):
-        listaLocs = ['heel', 'tip', 'in', 'out', 'ball', 'toes']
-        locsPos = [[-.47, 0, -.3], [0, 0, 1.8], [.39, 0, -.5], [-.77, 0, 0], [.39, 0, 0], [.39, 0, 0]]
-        for number_guide in range(len(listaLocs)):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, listaLocs[number_guide]))[0]
-            if number_guide == 0:
-                if cmds.objExists(GUIDES_GRP):
-                    cmds.parent(loc, GUIDES_GRP)
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
-            elif number_guide == 5:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, listaLocs[3]))
-            else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, listaLocs[number_guide - 1]))
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
-            cmds.xform(loc, t=locsPos[number_guide], os=True)
+        FOOT_GUIDES = ['heel', 'tip', 'in', 'out', 'ball', 'toes']
+        foot_pos = [[-.47, 0, -.3], [0, 0, 1.8], [.39, 0, -.5], [-.77, 0, 0], [.39, 0, 0], [.39, 0, 0]]
+        for number_guide in range(len(FOOT_GUIDES)):
+            guide_foot = cmds.spaceLocator(n='Guide_%s_%s' % (name, FOOT_GUIDES[number_guide]))[0]
+            if number_guide == 0: cmds.parent(guide_foot, GUIDES_GRP)
+            elif number_guide == 5: cmds.parent(guide_foot, 'Guide_%s_%s' % (name, FOOT_GUIDES[3]))
+            else: cmds.parent(guide_foot, 'Guide_%s_%s' % (name, FOOT_GUIDES[number_guide - 1]))
+            cmds.setAttr(guide_foot + '.overrideEnabled', True)
+            cmds.setAttr(guide_foot + '.overrideColor', color)
+            cmds.xform(guide_foot, t=foot_pos[number_guide], os=True)
     def neck(name, amount, color):
         for number_guide in range(amount):
-            loc = cmds.spaceLocator(n='Guide_%s_%s' % (name, str(number_guide + 1)))[0]
-            if number_guide == 0:
-                if cmds.objExists(GUIDES_GRP): cmds.parent(loc, GUIDES_GRP)                    
-                else:
-                    cmds.group(n=GUIDES_GRP, em=1)
-                    cmds.parent(loc, GUIDES_GRP)
+            guide_neck = cmds.spaceLocator(n='Guide_%s_%s' % (name, str(number_guide + 1)))[0]
+            if number_guide == 0: cmds.parent(guide_neck, GUIDES_GRP)
             else:
-                cmds.parent(loc, 'Guide_%s_%s' % (name, str(number_guide)))
+                cmds.parent(guide_neck, 'Guide_%s_%s' % (name, str(number_guide)))
                 moveAmount = 1.6 / amount
                 cmds.move(0, moveAmount, 0, ls=1)
-            cmds.setAttr(loc + '.overrideEnabled', 1)
-            cmds.setAttr(loc + '.overrideColor', color)
+            cmds.setAttr(guide_neck + '.overrideEnabled', 1)
+            cmds.setAttr(guide_neck + '.overrideColor', color)
         cmds.xform('Guide_%s_1' % (name), t=(0, 12.5, 0), os=True)
     def guideType(type, amount, color):
+        if cmds.objExists(GUIDES_GRP): pass                    
+        else: cmds.group(n=GUIDES_GRP, em=True)
+                    
         typeGuide = {
             "spine": spine,
             "l_arm": l_arm,
