@@ -1,4 +1,8 @@
-Aparejador will be a modular autorig
+Aparejador a a modular autorig (still in process)
+
+By the momento you have to run the follow lines to generate the guides
+
+
 
 
 The first step will be to create a simple body rig without bendys/toonies 
