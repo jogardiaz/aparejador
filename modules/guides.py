@@ -278,7 +278,7 @@ def generate_guides(type, name, amount=0, thumb=None, color='8'):
     else: guideType(type, amount, color)
 ##########################################################################################
 #FIX GUIDES SHAPES FOR BETTER VISUALIZATION
-def guides_sizes():
+def guides_sizes(resize = .2):
     cmds.select('Guide*')
     sel = cmds.ls(sl=True)
     print(sel)
@@ -286,7 +286,7 @@ def guides_sizes():
     for guide in sel: 
         if 'Shape' in guide:
             for axis in ('X','Y','Z'):
-                cmds.setAttr('%s.localScale%s'%(guide, axis), .2)
+                cmds.setAttr('%s.localScale%s'%(guide, axis), resize)
 
     cmds.select(cl=True)
 ##########################################################################################
@@ -299,7 +299,7 @@ def mirror_guides(correct_side='', mirror_to=''):
     cmds.setAttr('%s_guides_grp.scaleX'%(mirror_to), 1)
 
     for guide in range(len(list_correct_guides)):
-        if 'Shape' in list_correct_guides[guide]: pass
+        if 'Shape' in list_correct_guides[guide] : pass
         else:
             constraint = cmds.parentConstraint(list_correct_guides[guide], list_mirror_to_guides[guide],mo=False)
             cmds.delete(constraint)
@@ -311,7 +311,6 @@ def joints(vis = False):
     cmds.hide(GUIDES_MSTR_GRP)
 
     list_guides = cmds.listRelatives(GUIDES_MSTR_GRP, ad=True)
-    guides_positions = []
 
     if cmds.objExists(GUIDES_JOINTS_GRP): pass
     else: cmds.group(n=GUIDES_JOINTS_GRP, em=True)
