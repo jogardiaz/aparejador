@@ -7,7 +7,6 @@ chains = ['Wjnt','Fkjnt','Ikjnt']
 color = ''
 DO_NOT_TOUCH = 'DO_NOT_TOUCH'
 
-
 def rig_arm(type='l_arm', name='L_Arm'):
     if   type == 'l_arm': 
         side  = 'L'
@@ -35,14 +34,21 @@ def rig_arm(type='l_arm', name='L_Arm'):
     #CREATE FK CONTROLS
     for control in range(len(ARM_JOINTS)):
         controls.generate_control('Circle', color, '%s_%s_fk_ctrl'%(side, ARM_JOINTS[control]))
-        constraint = cmds.parentConstraint('%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]),
+        if control == 0:
+            constraint = cmds.pointConstraint('%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]),
                                            '%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), mo=False)
-        cmds.delete(constraint)
+            cmds.delete(constraint)
+        else: 
+            constraint = cmds.parentConstraint('%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]),
+                                           '%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), mo=False)
+            cmds.delete(constraint)
         if ARM_JOINTS[control] == ARM_JOINTS[0]:
-            cmds.parentConstraint('%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), '%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]))
+            cmds.parentConstraint('%s_%s_fk_ctrl'%(side, ARM_JOINTS[control]), 
+                                  '%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]), mo=True)
         elif ARM_JOINTS[control] == ARM_JOINTS[-1]: cmds.delete('%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]))
         else:
-            cmds.parentConstraint('%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), '%s_%s_%s'%(side, ARM_JOINTS[control], chains[1]))
+            cmds.parentConstraint('%s_%s_fk_ctrl'%(side, ARM_JOINTS[control]), 
+                                  '%s_%s_%s'%(side, ARM_JOINTS[control], chains[1]), mo=True)
             cmds.parent('%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), '%s_%s_fk_ctrl'%(side, ARM_JOINTS[control-1]))
     ##########################################################################################
     #CREATE IK
@@ -54,7 +60,8 @@ def rig_arm(type='l_arm', name='L_Arm'):
     cmds.parent(ik_arm, '%s_Hand_ctrl'%(side))
     cmds.orientConstraint('%s_Hand_ctrl'%(side), '%s_%s_%s'%(side, ARM_JOINTS[3], chains[2]))
 
-    cmds.addAttr('%s_Hand_ctrl'%(side), ln='sep', at='enum', en='********', k=True)
+    cmds.addAttr('%s_Hand_ctrl'%(side), ln='Sep', at='enum', en='********', k=True)
+    cmds.setAttr('%s_Hand_ctrl.Sep'%(side),l=True)
     cmds.addAttr('%s_Hand_ctrl'%(side), ln='strech', at='float', dv=1, min=0, max=1, k=True, h=False)
     cmds.addAttr('%s_Hand_ctrl'%(side), ln='volumPresservation', at='float', dv=1, min=0, max=1, k=True)
     ##########################################################################################
@@ -65,16 +72,16 @@ def rig_arm(type='l_arm', name='L_Arm'):
 
     # distance_arm = cmds.distanceDimension(sp=(pos_shoulder), ep=(pos_wrist))
     distance_arm = cmds.distanceDimension(sp=(.1,0,0), ep=(1.1,0,0))
-    distance_arm_value = cmds.getAttr("%s.distance"%(distance_arm)) 
     distance_arm_locs = cmds.listConnections( distance_arm, d=False, s=True )
     loc_dist_arm_1 = distance_arm_locs[0]
     loc_dist_arm_2 = distance_arm_locs[1]
     cmds.select(loc_dist_arm_1)
     cmds.xform(r=False, t=pos_shoulder)
-    cmds.parent(loc_dist_arm_1, '%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[0]))
+    cmds.parent(loc_dist_arm_1, '%s_%s_fk_ctrl'%(side, ARM_JOINTS[0]))
     cmds.select(loc_dist_arm_2)
     cmds.xform(r=False, t=pos_wrist)
     cmds.parent(loc_dist_arm_2, '%s_Hand_ctrl'%(side))
+    distance_arm_value = cmds.getAttr("%s.distance"%(distance_arm)) 
     
     controls.generate_control('Cone', color, '%s_pv_ctrl'%(name))
     constraint = cmds.pointConstraint('%s_%s_%s'%(side, ARM_JOINTS[2], chains[2]), '%s_pv_ctrl_adj'%(name), mo=False)
@@ -159,7 +166,7 @@ def rig_arm(type='l_arm', name='L_Arm'):
 
     control_vis_rev = cmds.shadingNode('reverse', n='%s_vis_tev'%(name), au=True)
     cmds.connectAttr('%s_switch_ctrl.IKFK'%(name), '%s.input.inputX'%(control_vis_rev))
-    cmds.connectAttr('%s.outputX'%(control_vis_rev), '%s_%s_fk_ctrl_adj.visibility'%(side, ARM_JOINTS[0]))
+    cmds.connectAttr('%s.outputX'%(control_vis_rev), '%s_%s_fk_ctrl_adj.visibility'%(side, ARM_JOINTS[1]))
     cmds.connectAttr('%s_switch_ctrl.IKFK'%(name), '%s_ik_ctrls_grp.visibility'%(name))
 
     for joint in ARM_JOINTS:
@@ -188,4 +195,5 @@ def rig_arm(type='l_arm', name='L_Arm'):
     cmds.parent(distance_arm, DO_NOT_TOUCH)
 
 
-rig_arm(type='l_arm', name='L_Arm')
+# rig_arm(type='l_arm', name='L_Arm')
+# rig_arm(type='r_arm', name='R_Arm')
