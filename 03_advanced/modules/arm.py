@@ -1,199 +1,230 @@
 ##########################################################################################
 import maya.cmds as cmds
 import modules.controls as controls 
+
 ##########################################################################################
 ARM_JOINTS=['Clavicle','Shoulder','Elbow','Wrist','HandTip']
 chains = ['Wjnt','Fkjnt','Ikjnt']
 color = ''
 DO_NOT_TOUCH = 'DO_NOT_TOUCH'
 
-def rig_arm(side='l', name='L_Arm'):
-    if   side == 'l': 
+def rig_arm(module = 'l_arm',name = 'L_Arm'):
+    if   module == 'l_arm': 
         side  = 'L'
         color = 'Blue'
-    elif side == 'r': 
+    elif module == 'r_arm': 
         side  = 'R'
         color = 'Red'
+
     ##########################################################################################
     #CREATE WJNT, FK AND IK CHAINS
-    cmds.select(cl=True)
+    cmds.select(clear=True)
     for chain in chains:
         for joint in ARM_JOINTS:
-            joint_arm = cmds.joint(n='%s_%s_%s'%(side, joint, chain))
+            joint_arm = cmds.joint(name=f'{side}_{joint}_{chain}')
             for axis in ('X','Y','Z'):
-                rotate_axis = cmds.getAttr('Guide_%s_%s_jnt.jointOrient%s'%(name, joint,axis))
-                cmds.setAttr('%s.jointOrient%s'%(joint_arm, axis), rotate_axis)
-            constraint = cmds.pointConstraint('Guide_%s_%s_jnt'%(name, joint), joint_arm, mo=False)
+                rotate_axis = cmds.getAttr(f'Guide_{name}_{joint}_jnt.jointOrient{axis}')
+                cmds.setAttr(f'{joint_arm}.jointOrient{axis}', rotate_axis)
+            constraint = cmds.pointConstraint(f'Guide_{name}_{joint}_jnt', 
+                                              joint_arm, maintainOffset=False)
             cmds.delete(constraint)      
-        cmds.select(cl=True)            
+        cmds.select(clear=True)            
 
     for chain in range(2):
-        cmds.parent('%s_%s_%s'%(side, ARM_JOINTS[1], chains[chain+1]),'%s_%s_%s'%(side, ARM_JOINTS[0], chains[0]))
-        cmds.delete('%s_%s_%s'%(side, ARM_JOINTS[0], chains[chain+1]))
+        cmds.parent(f'{side}_{ARM_JOINTS[1]}_{chains[chain+1]}',
+                    '{side}_{ARM_JOINTS[0]}_{chains[0]}')
+        cmds.delete(f'{side}_{ARM_JOINTS[0]}_{chains[chain+1]}')
+        
     ##########################################################################################
     #CREATE FK CONTROLS
     for control in range(len(ARM_JOINTS)):
-        controls.generate_control('Circle', color, '%s_%s_fk_ctrl'%(side, ARM_JOINTS[control]))
+        controls.generate_control('Circle', color, f'{side}_{ARM_JOINTS[control]}_fk_ctrl')
+        
         if control == 0:
-            constraint = cmds.pointConstraint('%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]),
-                                           '%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), mo=False)
+            constraint = cmds.pointConstraint(f'{side}_{ARM_JOINTS[control]}_{chains[0]}',
+                                           f'{side}_{ARM_JOINTS[control]}_fk_ctrl_adj', 
+                                           maintainOffset=False)
             cmds.delete(constraint)
+        
         else: 
-            constraint = cmds.parentConstraint('%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]),
-                                           '%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), mo=False)
+            constraint = cmds.parentConstraint(f'{side}_{ARM_JOINTS[control]}_{chains[0]}',
+                                           f'{side}_{ARM_JOINTS[control]}_fk_ctrl_adj', 
+                                           maintainOffset=False)
             cmds.delete(constraint)
+
         if ARM_JOINTS[control] == ARM_JOINTS[0]:
-            cmds.parentConstraint('%s_%s_fk_ctrl'%(side, ARM_JOINTS[control]), 
-                                  '%s_%s_%s'%(side, ARM_JOINTS[control], chains[0]), mo=True)
-        elif ARM_JOINTS[control] == ARM_JOINTS[-1]: cmds.delete('%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]))
+            cmds.parentConstraint(f'{side}_{ARM_JOINTS[control]}_fk_ctrl', 
+                                  f'{side}_{ARM_JOINTS[control]}_{chains[0]}', 
+                                  maintainOffset=True)
+        
+        elif ARM_JOINTS[control] == ARM_JOINTS[-1]: 
+            cmds.delete(f'{side}_{ARM_JOINTS[control]}_fk_ctrl_adj')
+        
         else:
-            cmds.parentConstraint('%s_%s_fk_ctrl'%(side, ARM_JOINTS[control]), 
-                                  '%s_%s_%s'%(side, ARM_JOINTS[control], chains[1]), mo=True)
-            cmds.parent('%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[control]), '%s_%s_fk_ctrl'%(side, ARM_JOINTS[control-1]))
+            cmds.parentConstraint(f'{side}_{ARM_JOINTS[control]}_fk_ctrl', 
+                                  f'{side}_{ARM_JOINTS[control]}_{chains[1]}',
+                                    maintainOffset=True)
+            cmds.parent(f'{side}_{ARM_JOINTS[control]}_fk_ctrl_adj',
+                        f'{side}_{ARM_JOINTS[control-1]}_fk_ctrl')
+            
     ##########################################################################################
     #CREATE IK
-    ik_arm = cmds.ikHandle(n='%s_IK'%(name),sj='%s_%s_%s'%(side, ARM_JOINTS[1], chains[2]), 
-                           ee='%s_%s_%s'%(side, ARM_JOINTS[3], chains[2]), solver='ikRPsolver' )[0]
-    controls.generate_control('Cube', color, '%s_Hand_ctrl'%(side))
-    constraint = cmds.parentConstraint('%s_%s_%s'%(side, ARM_JOINTS[3], chains[2]), '%s_Hand_ctrl_adj'%(side), mo=False)
+    ik_arm = cmds.ikHandle(n=f'{name}_IK',sj=f'{side}_{ARM_JOINTS[1]}_{chains[2]}', 
+                           ee=f'{side}_{ARM_JOINTS[3]}_{chains[2]}',solver='ikRPsolver')[0]
+    controls.generate_control('Cube', color, f'{side}_Hand_ctrl')
+    constraint = cmds.parentConstraint(f'{side}_{ARM_JOINTS[3]}_{chains[2]}',
+                                       f'{side}_Hand_ctrl_adj', maintainOffset=False)
     cmds.delete(constraint)
-    cmds.parent(ik_arm, '%s_Hand_ctrl'%(side))
-    cmds.orientConstraint('%s_Hand_ctrl'%(side), '%s_%s_%s'%(side, ARM_JOINTS[3], chains[2]))
+    cmds.parent(ik_arm, f'{side}_Hand_ctrl')
+    cmds.orientConstraint(f'{side}_Hand_ctrl',f'{side}_{ARM_JOINTS[3]}_{chains[2]}')
 
-    cmds.addAttr('%s_Hand_ctrl'%(side), ln='Sep', at='enum', en='********', k=True)
-    cmds.setAttr('%s_Hand_ctrl.Sep'%(side),l=True)
-    cmds.addAttr('%s_Hand_ctrl'%(side), ln='strech', at='float', dv=1, min=0, max=1, k=True, h=False)
-    cmds.addAttr('%s_Hand_ctrl'%(side), ln='volumPresservation', at='float', dv=1, min=0, max=1, k=True)
+    cmds.addAttr(f'{side}_Hand_ctrl', longName='Sep', attributeType='enum', 
+                 enumName='********', keyable=True)
+    cmds.setAttr(f'{side}_Hand_ctrl.Sep',l=True)
+    cmds.addAttr(f'{side}_Hand_ctrl', longName='strech', attributeType='float', 
+                 defaultValue=1, minValue=0, maxValue=1, keyable=True, hidden=False)
+    cmds.addAttr(f'{side}_Hand_ctrl', longName='volumPresservation', attributeType='float', 
+                 defaultValue=1, minValue=0, maxValue=1, k=True)
+    
     ##########################################################################################
     #CREATE POLE VECTOR
-    pos_shoulder = cmds.xform('%s_%s_%s'%(side, ARM_JOINTS[1], chains[2]), ws=True, q=True, t=True)
-    pos_elbow    = cmds.xform('%s_%s_%s'%(side, ARM_JOINTS[2], chains[2]), ws=True, q=True, t=True)
-    pos_wrist    = cmds.xform('%s_%s_%s'%(side, ARM_JOINTS[3], chains[2]), ws=True, q=True, t=True)
+    pos_shoulder = cmds.xform(f'{side}_{ARM_JOINTS[1]}_{chains[2]}', worldSpace=True,
+                              q=True, translation=True)
+    pos_elbow    = cmds.xform(f'{side}_{ARM_JOINTS[2]}_{chains[2]}', worldSpace=True,
+                              q=True, translation=True)
+    pos_wrist    = cmds.xform(f'{side}_{ARM_JOINTS[3]}_{chains[2]}', worldSpace=True,
+                              q=True, translation=True)
 
-    # distance_arm = cmds.distanceDimension(sp=(pos_shoulder), ep=(pos_wrist))
-    distance_arm = cmds.distanceDimension(sp=(.1,0,0), ep=(1.1,0,0))
-    distance_arm_locs = cmds.listConnections( distance_arm, d=False, s=True )
+    distance_arm = cmds.distanceDimension(startPoint=(.1,0,0), endPoint=(1.1,0,0))
+    distance_arm_locs = cmds.listConnections( distance_arm, destination=False, source=True)
     loc_dist_arm_1 = distance_arm_locs[0]
     loc_dist_arm_2 = distance_arm_locs[1]
     cmds.select(loc_dist_arm_1)
-    cmds.xform(r=False, t=pos_shoulder)
-    cmds.parent(loc_dist_arm_1, '%s_%s_fk_ctrl'%(side, ARM_JOINTS[0]))
+    cmds.xform(relative=False, translation=pos_shoulder)
+    cmds.parent(loc_dist_arm_1, f'{side}_{ARM_JOINTS[0]}_fk_ctrl')
     cmds.select(loc_dist_arm_2)
-    cmds.xform(r=False, t=pos_wrist)
-    cmds.parent(loc_dist_arm_2, '%s_Hand_ctrl'%(side))
-    distance_arm_value = cmds.getAttr("%s.distance"%(distance_arm)) 
+    cmds.xform(relative=False, translation=pos_wrist)
+    cmds.parent(loc_dist_arm_2, f'{side}_Hand_ctrl')
+    distance_arm_value = cmds.getAttr(f'{distance_arm}.distance') 
     
-    controls.generate_control('Cone', color, '%s_pv_ctrl'%(name))
-    constraint = cmds.pointConstraint('%s_%s_%s'%(side, ARM_JOINTS[2], chains[2]), '%s_pv_ctrl_adj'%(name), mo=False)
+    controls.generate_control('Cone', color, f'{name}_pv_ctrl')
+    constraint = cmds.pointConstraint(f'{side}_{ARM_JOINTS[2]}_{chains[2]}',
+                                      f'{name}_pv_ctrl_adj', maintainOffset=False)
     cmds.delete(constraint)
-    cmds.select('%s_pv_ctrl_adj'%(name))
-    cmds.move(-(distance_arm_value), z=True,r=True)
+    cmds.select(f'{name}_pv_ctrl_adj')
+    cmds.move(-(distance_arm_value), z=True,relative=True)
     
-    curve_pv = cmds.curve(n='%s_cv_pv'%(name),d=1, p=(pos_shoulder, pos_elbow, pos_wrist)) 
-    cmds.moveVertexAlongDirection ('%s.cv[1]'%(curve_pv), n= distance_arm_value)
-    locator_pv = cmds.spaceLocator(n='%s_pv_loc'%(name))[0]
-    pos_pv= cmds.pointPosition ('%s.cv[1]'%(curve_pv))
-    cmds.xform (locator_pv, ws=True, t=pos_pv)
-    cmds.parent(locator_pv, '%s_pv_ctrl'%(name))
+    curve_pv = cmds.curve(name=f'{name}_cv_pv',degree=1,
+                          point=(pos_shoulder, pos_elbow, pos_wrist)) 
+    cmds.moveVertexAlongDirection (f'{curve_pv}.cv[1]',normalDirection=distance_arm_value)
+    locator_pv = cmds.spaceLocator(name=f'{name}_pv_loc')[0]
+    pos_pv= cmds.pointPosition (f'{curve_pv}.cv[1]')
+    cmds.xform (locator_pv, worldSpace=True, translation=pos_pv)
+    cmds.parent(locator_pv, f'{name}_pv_ctrl')
     cmds.poleVectorConstraint(locator_pv, ik_arm)
 
     cmds.delete(curve_pv)
+
     ##########################################################################################
     #STRECH AND VOLUMEN PRESSERVATION
-    global_md = cmds.shadingNode('multiplyDivide', n='%s_global_md'%(name), au=True)
-    cmds.setAttr('%s.operation'%(global_md), 2)
-    cmds.connectAttr('%s.distance'%(distance_arm), '%s.input1.input1X'%(global_md))
+    global_md = cmds.shadingNode('multiplyDivide', name=f'{name}_global_md', asUtility=True)
+    cmds.setAttr(f'{global_md}.operation', 2)
+    cmds.connectAttr(f'{distance_arm}.distance',f'{global_md}.input1.input1X')
     
-    distance_arm1 = cmds.distanceDimension(sp=(pos_shoulder), ep=(pos_elbow))
-    distance_arm1_value = cmds.getAttr("%s.distance"%(distance_arm1)) 
-    distance_arm1 = cmds.listRelatives(distance_arm1, p=True)
+    distance_arm1 = cmds.distanceDimension(startPoint=(pos_shoulder), endPoint=(pos_elbow))
+    distance_arm1_value = cmds.getAttr(f"{distance_arm1}.distance") 
+    distance_arm1 = cmds.listRelatives(distance_arm1, parent=True)
     cmds.delete(distance_arm1)
-    distance_arm2 = cmds.distanceDimension(sp=(pos_elbow), ep=(pos_wrist))
-    distance_arm2_value = cmds.getAttr("%s.distance"%(distance_arm2)) 
-    distance_arm2 = cmds.listRelatives(distance_arm2, p=True)
+    distance_arm2 = cmds.distanceDimension(startPoint=(pos_elbow), endPoint=(pos_wrist))
+    distance_arm2_value = cmds.getAttr(f"{distance_arm2}.distance") 
+    distance_arm2 = cmds.listRelatives(distance_arm2, parent=True)
     cmds.delete(distance_arm2)
     distance_arm_strech = distance_arm1_value + distance_arm2_value
     
-    strech_md = cmds.shadingNode('multiplyDivide', n='%s_strech_md'%(name), au=True)
-    cmds.setAttr('%s.operation'%(strech_md), 2)
-    cmds.connectAttr('%s.output.outputX'%(global_md), '%s.input1.input1X'%(strech_md))
-    cmds.setAttr('%s.input2X'%(strech_md), distance_arm_strech)
+    strech_md = cmds.shadingNode('multiplyDivide', name=f'{name}_strech_md', asUtility=True)
+    cmds.setAttr(f'{strech_md}.operation', 2)
+    cmds.connectAttr(f'{global_md}.output.outputX', f'{strech_md}.input1.input1X')
+    cmds.setAttr(f'{strech_md}.input2X', distance_arm_strech)
 
-    condition_strech = cmds.shadingNode('condition', n='%s_strech_con'%(name), au=True)
-    cmds.connectAttr('%s.outputX'%(strech_md), '%s.firstTerm'%(condition_strech))
-    cmds.connectAttr('%s.outputX'%(strech_md), '%s.colorIfTrueR'%(condition_strech))
-    cmds.setAttr('%s.secondTerm'%(condition_strech), 1)
-    cmds.setAttr('%s.operation'%(condition_strech), 2)
+    condition_strech = cmds.shadingNode('condition', name=f'{name}_strech_con', asUtility=True)
+    cmds.connectAttr(f'{strech_md}.outputX', f'{condition_strech}.firstTerm')
+    cmds.connectAttr(f'{strech_md}.outputX', f'{condition_strech}.colorIfTrueR')
+    cmds.setAttr(f'{condition_strech}.secondTerm', 1)
+    cmds.setAttr(f'{condition_strech}.operation', 2)
 
-    blendColor_strech = cmds.shadingNode('blendColors', n='%s_strech_bc'%(name), au=True)
-    cmds.connectAttr('%s.outColorR'%(condition_strech), '%s.color1R'%(blendColor_strech))
-    cmds.connectAttr('%s_Hand_ctrl.strech'%(side), '%s.blender'%(blendColor_strech))
-    cmds.setAttr('%s.color2R'%(blendColor_strech), 1)
-    cmds.connectAttr('%s.output.outputR'%(blendColor_strech), '%s_%s_%s.scale.scaleX'%(side,ARM_JOINTS[1], chains[2]))
-    cmds.connectAttr('%s.output.outputR'%(blendColor_strech), '%s_%s_%s.scale.scaleX'%(side,ARM_JOINTS[2], chains[2]))
+    blendColor_strech = cmds.shadingNode('blendColors', name=f'{name}_strech_bc', asUtility=True)
+    cmds.connectAttr(f'{condition_strech}.outColorR', f'{blendColor_strech}.color1R')
+    cmds.connectAttr(f'{side}_Hand_ctrl.strech', f'{blender}.'%(blendColor_strech))
+    cmds.setAttr(f'{blendColor_strech}.color2R', 1)
+    cmds.connectAttr(f'{blendColor_strech}.output.outputR',
+                     f'{side}_{ARM_JOINTS[1]}_{chains[2]}.scale.scaleX')
+    cmds.connectAttr(f'{blendColor_strech}.output.outputR',
+                     f'{side}_{ARM_JOINTS[2]}_{chains[2]}.scale.scaleX')
 
-    pow_volumen = cmds.shadingNode('multiplyDivide', n='%s_volum_pow'%(name), au=True)
-    cmds.connectAttr('%s.outColorR'%(condition_strech), '%s.input1.input1X'%(pow_volumen))
-    cmds.setAttr('%s.input2.input2X'%(pow_volumen), .5)
-    cmds.setAttr('%s.operation'%(pow_volumen), 3)
+    pow_volumen = cmds.shadingNode('multiplyDivide', name=f'{name}_volum_pow', asUtility=True)
+    cmds.connectAttr(f'{condition_strech}.outColorR',f'{pow_volumen}.input1.input1X')
+    cmds.setAttr(f'{pow_volumen}.input2.input2X', .5)
+    cmds.setAttr(f'{pow_volumen}.operation', 3)
 
-    volum_md = cmds.shadingNode('multiplyDivide', n='%s_volum_md'%(name), au=True)
-    cmds.connectAttr('%s.output.outputX'%(pow_volumen), '%s.input2.input2X'%(volum_md))
-    cmds.setAttr('%s.input1.input1X'%(volum_md), 1)
-    cmds.setAttr('%s.operation'%(volum_md), 2)
-    cmds.connectAttr('%s.output.outputX'%(volum_md), '%s_%s_%s.scale.scaleY'%(side,ARM_JOINTS[1], chains[2]))
-    cmds.connectAttr('%s.output.outputX'%(volum_md), '%s_%s_%s.scale.scaleY'%(side,ARM_JOINTS[2], chains[2]))
-    cmds.connectAttr('%s.output.outputX'%(volum_md), '%s_%s_%s.scale.scaleZ'%(side,ARM_JOINTS[1], chains[2]))
-    cmds.connectAttr('%s.output.outputX'%(volum_md), '%s_%s_%s.scale.scaleZ'%(side,ARM_JOINTS[2], chains[2]))
+    volum_md = cmds.shadingNode('multiplyDivide', name=f'{name}_volum_md', asUtility=True)
+    cmds.connectAttr(f'{pow_volumen}.output.outputX', f'{volum_md}.input2.input2X')
+    cmds.setAttr(f'{volum_md}.input1.input1X', 1)
+    cmds.setAttr(f'{volum_md}.operation', 2)
+    cmds.connectAttr(f'{volum_md}.output.outputX', f'{side}_{ARM_JOINTS[1]}_{chains[2]}.scale.scaleY')
+    cmds.connectAttr(f'{volum_md}.output.outputX', f'{side}_{ARM_JOINTS[2]}_{chains[2]}.scale.scaleY')
+    cmds.connectAttr(f'{volum_md}.output.outputX', f'{side}_{ARM_JOINTS[1]}_{chains[2]}.scale.scaleZ')
+    cmds.connectAttr(f'{volum_md}.output.outputX', f'{side}_{ARM_JOINTS[2]}_{chains[2]}.scale.scaleZ')
     ##########################################################################################
     #SWITCH IK/FK
-    ctrls_grp    = cmds.group(n='%s_ctrls_grp'%(name), em=True)
-    ctrls_ik_grp = cmds.group(n='%s_ik_ctrls_grp'%(name), em=True)
+    ctrls_grp    = cmds.group(n=f'{name}_ctrls_grp', empty=True)
+    ctrls_ik_grp = cmds.group(n=f'{name}_ik_ctrls_grp', empty=True)
 
-    if cmds.objExists('%s_switch_ctrl'%(name)): pass
-    else: controls.generate_control('Cube', color, '%s_switch_ctrl'%(name))
+    if cmds.objExists(f'{name}_switch_ctrl'): pass
+    else: controls.generate_control('Cube', color, f'{name}_switch_ctrl')
 
     attributes = ['tx','ty','tz','rx','ry','rz','sx','sy','sz','v']
     for attr in attributes:
-        cmds.setAttr('%s_switch_ctrl.%s'%(name,attr), lock=True, k=False)
-    cmds.addAttr('%s_switch_ctrl'%(name), ln='IKFK', at='float', dv=1, min=0, max=1, k=True, h=False) 
+        cmds.setAttr(f'{name}_switch_ctrl.{attr}', lock=True, keyable=False)
+    cmds.addAttr(f'{name}_switch_ctrl', longName='IKFK', attributeType='float', 
+                 defaultValue=1, minValue=0, maxValue=1, keyable=True, hidden=False) 
 
-    constraint = cmds.pointConstraint('%s_%s_%s'%(side,ARM_JOINTS[-1],chains[0]), '%s_switch_ctrl_adj'%(name), mo=False)
+    constraint = cmds.pointConstraint(f'{side}_{ARM_JOINTS[-1]}_{chains[0]}', 
+                                      f'{name}_switch_ctrl_adj', maintainOffset=False)
     cmds.delete(constraint)
-    movement = cmds.getAttr('%s_%s_%s.tx'%(side,ARM_JOINTS[-1],chains[0]))
-    cmds.select('%s_switch_ctrl_adj'%(name))
-    cmds.move(movement, y=True,r=True)
+    movement = cmds.getAttr(f'{side}_{ARM_JOINTS[-1]}_{chains[0]}.tx')
+    cmds.select(f'{name}_switch_ctrl_adj')
+    cmds.move(movement, y=True, relative=True)
 
-    control_vis_rev = cmds.shadingNode('reverse', n='%s_vis_tev'%(name), au=True)
-    cmds.connectAttr('%s_switch_ctrl.IKFK'%(name), '%s.input.inputX'%(control_vis_rev))
-    cmds.connectAttr('%s.outputX'%(control_vis_rev), '%s_%s_fk_ctrl_adj.visibility'%(side, ARM_JOINTS[1]))
-    cmds.connectAttr('%s_switch_ctrl.IKFK'%(name), '%s_ik_ctrls_grp.visibility'%(name))
+    control_vis_rev = cmds.shadingNode('reverse', name=f'{name}_vis_tev', asUtility=True)
+    cmds.connectAttr(f'{name}_switch_ctrl.IKFK', f'{control_vis_rev}.input.inputX')
+    cmds.connectAttr(f'{control_vis_rev}.outputX', f'{side}_{ARM_JOINTS[1]}_fk_ctrl_adj.visibility')
+    cmds.connectAttr(f'{name}_switch_ctrl.IKFK', f'{name}_ik_ctrls_grp.visibility')
 
     for joint in ARM_JOINTS:
         if joint == ARM_JOINTS[0]:pass
         else:
             for movement in ('translate', 'rotate', 'scale'):
-                blend_color = cmds.shadingNode('blendColors',n='%s_%s_switch_bc'%(side,joint),au=True)
-                cmds.connectAttr('%s_switch_ctrl.IKFK'%(name), '%s.blender'%(blend_color))
-                cmds.connectAttr('%s_%s_%s.%s'%(side,joint,chains[2],movement), '%s.color1'%(blend_color))
-                cmds.connectAttr('%s_%s_%s.%s'%(side,joint,chains[1],movement), '%s.color2'%(blend_color))
-                cmds.connectAttr('%s.output'%(blend_color), '%s_%s_%s.%s'%(side,joint,chains[0],movement))
+                blend_color = cmds.shadingNode('blendColors',name=f'{side}_{joint}_switch_bc',asUtility=True)
+                cmds.connectAttr(f'{name}_switch_ctrl.IKFK', f'{blend_color}.blender')
+                cmds.connectAttr(f'{side}_{joint}_{chains[2]}.{movement}', f'{blend_color}.color1')
+                cmds.connectAttr(f'{side}_{joint}_{chains[1]}.{movement}', f'{blend_color}.color2')
+                cmds.connectAttr(f'{blend_color}.output', f'{side}_{joint}_{chains[0]}.{movement}')
     ##########################################################################################
     #CLEAN ARM SETUP
-    module_grp   = cmds.group(n='%s_mstr_grp'%(name), em=True)
+    module_grp   = cmds.group(name=f'{name}_mstr_grp', empty=True)
 
     if cmds.objExists(DO_NOT_TOUCH): pass
-    else: cmds.group(n=DO_NOT_TOUCH, em=True)
+    else: cmds.group(name=DO_NOT_TOUCH, empty=True)
 
-    cmds.parent('%s_Hand_ctrl_adj'%(side), '%s_pv_ctrl_adj'%(name),ctrls_ik_grp)
-    cmds.parent(ctrls_ik_grp, '%s_%s_fk_ctrl_adj'%(side, ARM_JOINTS[0]), '%s_switch_ctrl_adj'%(name), ctrls_grp)
-    cmds.parent('%s_%s_%s'%(side, ARM_JOINTS[0], chains[0]), ctrls_grp, module_grp)
+    cmds.parent(f'{side}_Hand_ctrl_adj', f'{name}_pv_ctrl_adj',ctrls_ik_grp)
+    cmds.parent(ctrls_ik_grp, f'{side}_{ARM_JOINTS[0]}_fk_ctrl_adj', f'{name}_switch_ctrl_adj', ctrls_grp)
+    cmds.parent(f'{side}_{ARM_JOINTS[0]}_{chains[0]}', ctrls_grp, module_grp)
 
     distance_arm = cmds.listRelatives(distance_arm, p=True)
-    cmds.hide(locator_pv, ik_arm,distance_arm, '%s_%s_%s'%(side, ARM_JOINTS[1], chains[2]), 
-              '%s_%s_%s'%(side, ARM_JOINTS[1], chains[1]),loc_dist_arm_1,loc_dist_arm_2)
+    cmds.hide(locator_pv, ik_arm,distance_arm, f'{side}_{ARM_JOINTS[1]}_{chains[2]}', 
+              f'{side}_{ARM_JOINTS[1]}_{chains[1]}', loc_dist_arm_1, loc_dist_arm_2)
     cmds.parent(distance_arm, DO_NOT_TOUCH)
 
 
-# rig_arm(side='l_arm', name='L_Arm')
-# rig_arm(side='r_arm', name='R_Arm')
+# rig_arm(module='l_arm', name='L_Arm')
+# rig_arm(module='r_arm', name='R_Arm')
