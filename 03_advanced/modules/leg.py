@@ -222,3 +222,4 @@ def rig_leg(side='l', name='L_Leg'):
     
 
 # rig_leg(side='l', name='L_Leg')
+# rig_leg(side='r', name='R_Leg')

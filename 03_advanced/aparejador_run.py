@@ -13,7 +13,11 @@ path_aparejador = 'J:\\python advance\\aparejador\\03_advanced'
 sys.path.append(path_aparejador)
 
 from modules import guides
-from modules import arm, leg, reverse_foot, hand, spine
+from modules import arm
+from modules import leg
+from modules import reverse_foot
+from modules import hand
+from modules import spine
 importlib.reload(arm)
 importlib.reload(leg)
 importlib.reload(guides)

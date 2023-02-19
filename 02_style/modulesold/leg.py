@@ -8,11 +8,11 @@ color = ''
 DO_NOT_TOUCH = 'DO_NOT_TOUCH'
 
 
-def rig_leg(type='l_leg', name='L_Leg'):
-    if   type == 'l_leg': 
+def rig_leg(side='l', name='L_Leg'):
+    if   side == 'l': 
         side  = 'L'
         color = 'Blue'
-    elif type == 'r_leg': 
+    elif side == 'r': 
         side  = 'R'
         color = 'Red'
     ##########################################################################################
@@ -199,4 +199,5 @@ def rig_leg(type='l_leg', name='L_Leg'):
 
     
 
-# rig_leg(type='l_leg', name='L_Leg')
+# rig_leg(side='l', name='L_Leg')
+# rig_leg(side='r', name='R_Leg')

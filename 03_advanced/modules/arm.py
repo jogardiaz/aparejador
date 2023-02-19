@@ -1,6 +1,13 @@
 ##########################################################################################
+import importlib
+
+
 import maya.cmds as cmds
 import modules.controls as controls 
+
+from controls import *
+
+importlib.reload(controls)
 
 ##########################################################################################
 ARM_JOINTS=['Clavicle','Shoulder','Elbow','Wrist','HandTip']
@@ -8,11 +15,11 @@ chains = ['Wjnt','Fkjnt','Ikjnt']
 color = ''
 DO_NOT_TOUCH = 'DO_NOT_TOUCH'
 
-def rig_arm(module = 'l_arm',name = 'L_Arm'):
-    if   module == 'l_arm': 
+def rig_arm(side = 'l',name = 'L_Arm'):
+    if   side == 'l': 
         side  = 'L'
         color = 'Blue'
-    elif module == 'r_arm': 
+    elif side == 'r': 
         side  = 'R'
         color = 'Red'
 
@@ -32,13 +39,13 @@ def rig_arm(module = 'l_arm',name = 'L_Arm'):
 
     for chain in range(2):
         cmds.parent(f'{side}_{ARM_JOINTS[1]}_{chains[chain+1]}',
-                    '{side}_{ARM_JOINTS[0]}_{chains[0]}')
+                    f'{side}_{ARM_JOINTS[0]}_{chains[0]}')
         cmds.delete(f'{side}_{ARM_JOINTS[0]}_{chains[chain+1]}')
         
     ##########################################################################################
     #CREATE FK CONTROLS
     for control in range(len(ARM_JOINTS)):
-        controls.generate_control('Circle', color, f'{side}_{ARM_JOINTS[control]}_fk_ctrl')
+        controls.Circle(name = color, color_name = f'{side}_{ARM_JOINTS[control]}_fk_ctrl')
         
         if control == 0:
             constraint = cmds.pointConstraint(f'{side}_{ARM_JOINTS[control]}_{chains[0]}',
@@ -71,7 +78,7 @@ def rig_arm(module = 'l_arm',name = 'L_Arm'):
     #CREATE IK
     ik_arm = cmds.ikHandle(n=f'{name}_IK',sj=f'{side}_{ARM_JOINTS[1]}_{chains[2]}', 
                            ee=f'{side}_{ARM_JOINTS[3]}_{chains[2]}',solver='ikRPsolver')[0]
-    controls.generate_control('Cube', color, f'{side}_Hand_ctrl')
+    controls.Cube(color_name = color, name = f'{side}_Hand_ctrl')
     constraint = cmds.parentConstraint(f'{side}_{ARM_JOINTS[3]}_{chains[2]}',
                                        f'{side}_Hand_ctrl_adj', maintainOffset=False)
     cmds.delete(constraint)
@@ -107,7 +114,7 @@ def rig_arm(module = 'l_arm',name = 'L_Arm'):
     cmds.parent(loc_dist_arm_2, f'{side}_Hand_ctrl')
     distance_arm_value = cmds.getAttr(f'{distance_arm}.distance') 
     
-    controls.generate_control('Cone', color, f'{name}_pv_ctrl')
+    controls.Cone(color_name = color, name = f'{name}_pv_ctrl')
     constraint = cmds.pointConstraint(f'{side}_{ARM_JOINTS[2]}_{chains[2]}',
                                       f'{name}_pv_ctrl_adj', maintainOffset=False)
     cmds.delete(constraint)
@@ -154,7 +161,7 @@ def rig_arm(module = 'l_arm',name = 'L_Arm'):
 
     blendColor_strech = cmds.shadingNode('blendColors', name=f'{name}_strech_bc', asUtility=True)
     cmds.connectAttr(f'{condition_strech}.outColorR', f'{blendColor_strech}.color1R')
-    cmds.connectAttr(f'{side}_Hand_ctrl.strech', f'{blender}.'%(blendColor_strech))
+    cmds.connectAttr(f'{side}_Hand_ctrl.strech', f'{blendColor_strech}.blender')
     cmds.setAttr(f'{blendColor_strech}.color2R', 1)
     cmds.connectAttr(f'{blendColor_strech}.output.outputR',
                      f'{side}_{ARM_JOINTS[1]}_{chains[2]}.scale.scaleX')
@@ -180,7 +187,7 @@ def rig_arm(module = 'l_arm',name = 'L_Arm'):
     ctrls_ik_grp = cmds.group(n=f'{name}_ik_ctrls_grp', empty=True)
 
     if cmds.objExists(f'{name}_switch_ctrl'): pass
-    else: controls.generate_control('Cube', color, f'{name}_switch_ctrl')
+    else: controls.Cube(color_name = color, name = f'{name}_switch_ctrl')
 
     attributes = ['tx','ty','tz','rx','ry','rz','sx','sy','sz','v']
     for attr in attributes:
@@ -226,5 +233,5 @@ def rig_arm(module = 'l_arm',name = 'L_Arm'):
     cmds.parent(distance_arm, DO_NOT_TOUCH)
 
 
-# rig_arm(module='l_arm', name='L_Arm')
-# rig_arm(module='r_arm', name='R_Arm')
+# rig_arm(side='l', name='L_Arm')
+# rig_arm(side='r', name='R_Arm')

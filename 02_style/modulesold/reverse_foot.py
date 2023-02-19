@@ -3,9 +3,9 @@ import maya.cmds as cmds
 REVERSE_FOOT_LOCS = ['heel','tip','in','out','ball','toes']
 
 #Create attributes in the control and connect to the rotation of the locators
-def create_reverse_foot(type='', name='',connect_to=''):
-    if   type == 'l_foot': side  = 'L'
-    elif type == 'r_foot': side  = 'R'
+def create_reverse_foot(side='', name='', connect_to=''):
+    if   side == 'l': side  = 'L'
+    elif side == 'r': side  = 'R'
     ##########################################################################################
     #CREATE FINAL LOCATORS AND HIERARCHY
     cmds.select(cl=True)

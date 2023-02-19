@@ -91,3 +91,6 @@ def create_reverse_foot(side='', name='',connect_to=''):
     cmds.parent(f'{connect_to}_ball_IK', f'{connect_to}_IK', f'{name}_ball_reverse_foot')
     cmds.parent(f'{connect_to}_toe_IK', f'{name}_toes_reverse_foot')
     cmds.hide(f'{name}_{REVERSE_FOOT_LOCS[0]}_reverse_foot_adj')
+
+# reverse_foot.create_reverse_foot(side='l', name='L_Foot',connect_to='L_Leg')
+# reverse_foot.create_reverse_foot(side='r', name='R_Foot',connect_to='R_Leg')
