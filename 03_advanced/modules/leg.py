@@ -1,6 +1,9 @@
 ##########################################################################################
 import maya.cmds as cmds
 from modules import controls
+
+from modules.controls import *
+
 ##########################################################################################
 LEG_JOINTS=['Pelvis','Hip','Knee','Ankle','Ball','FootTip']
 chains = ['Wjnt','Fkjnt','Ikjnt']

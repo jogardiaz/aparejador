@@ -1,6 +1,9 @@
 ##########################################################################################
 import maya.cmds as cmds
 from modules import controls
+
+from modules.controls import *
+
 ##########################################################################################
 color = ''
 DO_NOT_TOUCH = 'DO_NOT_TOUCH'
@@ -38,8 +41,7 @@ def rig_hand(side='', name='', thumb=True, amount=4):
                 cmds.setAttr(f'{joint_finger}.jointOrient{axis}', rotate_axis)
             
             if number < 4:
-                controls.generate_control(control_shape='Circle', shape_color=color, 
-                                          name=f'{side}_{finger}_{number+1}_ctrl')
+                controls.Circle(name = f'{side}_{finger}_{number+1}_ctrl', color_name = color)
                 constraint = cmds.parentConstraint(joint_finger, 
                                                 f'{side}_{finger}_{number+1}_ctrl_adj', mo=False)
                 cmds.delete(constraint)

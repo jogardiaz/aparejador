@@ -2,6 +2,8 @@
 import maya.cmds as cmds
 from modules import controls
 
+from modules.controls import *
+
 ##########################################################################################
 color_main = 'Yellow'
 color_sec  = 'Green'
@@ -30,13 +32,13 @@ def rig_spine(name='', amount=0):
     cmds.rename(ik[-1], f'{name}_crv')
     ik_crv = f'{name}_crv'
 
-    controls.generate_control(control_shape='Cube', shape_color=color_main, name=f'{side}_Hip_ctrl')
+    controls.Cube(name = f'{side}_Hip_ctrl', color_name = color_main)
     joint_hip = cmds.joint(name=f'{side}_Hip_jnt')
     cmds.parent(joint_hip, f'{side}_Hip_ctrl')
     constraint = cmds.pointConstraint(f'{side}_{name}_1_Wjnt', f'{side}_Hip_ctrl_adj')
     cmds.delete(constraint)
     
-    controls.generate_control(control_shape='Circle', shape_color=color_main, name=f'{side}_Chest_ctrl')
+    controls.Circle(name = f'{side}_Chest_ctrl', color_name = color_main)
     joint_chest = cmds.joint(name=f'{side}_Chest_jnt')
     cmds.parent(joint_chest, f'{side}_Chest_ctrl')
     constraint = cmds.pointConstraint(f'{side}_{name}_{amount}_Wjnt', f'{side}_Chest_ctrl_adj')

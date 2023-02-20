@@ -1,11 +1,10 @@
 ##########################################################################################
 import importlib
 
-
 import maya.cmds as cmds
 import modules.controls as controls 
 
-from controls import *
+from modules.controls import *
 
 importlib.reload(controls)
 
